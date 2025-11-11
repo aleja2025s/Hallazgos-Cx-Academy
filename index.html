@@ -1,0 +1,1547 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Análisis de Impacto - Creación de Material</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Google Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #1a1a1a;
+            padding: 0;
+            margin: 0;
+            color: #333;
+            overflow-x: hidden;
+        }
+
+        .slide-container {
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .slide {
+            width: 100vw;
+            height: 100vh;
+            position: absolute;
+            top: 0;
+            left: 0;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.5s ease, visibility 0.5s ease;
+            overflow-y: auto;
+            background: white;
+        }
+
+        .slide.active {
+            opacity: 1;
+            visibility: visible;
+            z-index: 1;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            height: 100%;
+            background: white;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #8247e5 0%, #6a31ca 100%);
+            color: white;
+            padding: 30px 40px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+
+        .header h1 {
+            font-size: 26px;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .header p {
+            font-size: 14px;
+            opacity: 0.95;
+            font-weight: 400;
+        }
+
+        .content {
+            padding: 40px;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .slide-nav {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            display: flex;
+            gap: 12px;
+            z-index: 1000;
+        }
+
+        .nav-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: #8247e5;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(130, 71, 229, 0.4);
+            transition: all 0.3s;
+        }
+
+        .nav-btn:hover {
+            background: #6a31ca;
+            transform: scale(1.1);
+        }
+
+        .nav-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: scale(1);
+        }
+
+        .slide-indicator {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+            z-index: 1000;
+        }
+
+        .indicator-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #ccc;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .indicator-dot.active {
+            background: #8247e5;
+            width: 30px;
+            border-radius: 6px;
+        }
+
+        .section {
+            margin-bottom: 50px;
+            page-break-inside: avoid;
+        }
+
+        .section-title {
+            font-size: 26px;
+            font-weight: 700;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding-bottom: 12px;
+            border-bottom: 3px solid #8247e5;
+        }
+
+        .section-title.pros {
+            color: #00a868;
+            border-bottom-color: #00a868;
+        }
+
+        .section-title.cons {
+            color: #e54747;
+            border-bottom-color: #e54747;
+        }
+
+        .section-title.impact {
+            color: #8247e5;
+            border-bottom-color: #8247e5;
+        }
+
+        .section-title.recommendations {
+            color: #ff6600;
+            border-bottom-color: #ff6600;
+        }
+
+        .subsection {
+            margin-bottom: 32px;
+            background: #f9f9f9;
+            padding: 24px;
+            border-radius: 12px;
+            border-left: 4px solid #8247e5;
+        }
+
+        .subsection h3 {
+            font-size: 19px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: #8247e5;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .list-item {
+            margin-bottom: 10px;
+            padding: 12px 16px;
+            background: white;
+            border-radius: 8px;
+            border-left: 3px solid #8247e5;
+            line-height: 1.5;
+            font-size: 14px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .list-item strong {
+            color: #8247e5;
+            font-weight: 600;
+            display: block;
+            margin-bottom: 4px;
+            font-size: 15px;
+        }
+
+        .list-item-desc {
+            color: #666;
+            font-size: 13px;
+            line-height: 1.4;
+        }
+
+        .data-table {
+            width: 100%;
+            margin-top: 16px;
+            border-collapse: collapse;
+            font-size: 13px;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .data-table thead {
+            background: #8247e5;
+            color: white;
+        }
+
+        .data-table th {
+            padding: 10px 12px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .data-table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .data-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .data-table tbody tr:hover {
+            background: #f9f9f9;
+        }
+
+        .metric-value {
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 6px;
+            display: inline-block;
+            font-size: 13px;
+        }
+
+        .metric-value.positive {
+            background: #e8f9f0;
+            color: #00a868;
+        }
+
+        .metric-value.negative {
+            background: #fee;
+            color: #e54747;
+        }
+
+        .metric-value.warning {
+            background: #fff3e0;
+            color: #ff6600;
+        }
+
+        .impact-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .impact-box {
+            padding: 20px;
+            border-radius: 12px;
+            border: 2px solid;
+        }
+
+        .impact-box.positive {
+            background: #e8f9f0;
+            border-color: #00a868;
+        }
+
+        .impact-box.negative {
+            background: #fee;
+            border-color: #e54747;
+        }
+
+        .impact-box h4 {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .impact-box.positive h4 {
+            color: #00a868;
+        }
+
+        .impact-box.negative h4 {
+            color: #e54747;
+        }
+
+        .impact-item {
+            margin-bottom: 10px;
+            display: block;
+            font-size: 13px;
+            line-height: 1.6;
+            padding: 10px 14px;
+            background: rgba(255,255,255,0.5);
+            border-radius: 6px;
+        }
+
+        .impact-item strong {
+            font-weight: 600;
+        }
+
+        .recommendation-item {
+            background: white;
+            padding: 14px 18px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            border-left: 3px solid #ff6600;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .recommendation-item strong {
+            color: #ff6600;
+            font-weight: 600;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .metric-card {
+            background: linear-gradient(135deg, #f9f9f9 0%, #ffffff 100%);
+            padding: 24px;
+            border-radius: 12px;
+            border-left: 4px solid #8247e5;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            text-align: center;
+        }
+
+        .metric-card.highlight {
+            border-left-color: #00a868;
+        }
+
+        .metric-card.warning {
+            border-left-color: #ff6600;
+        }
+
+        .metric-card.alert {
+            border-left-color: #e54747;
+        }
+
+        .metric-card-value {
+            font-size: 36px;
+            font-weight: 700;
+            color: #8247e5;
+            margin-bottom: 8px;
+        }
+
+        .metric-card.highlight .metric-card-value {
+            color: #00a868;
+        }
+
+        .metric-card.warning .metric-card-value {
+            color: #ff6600;
+        }
+
+        .metric-card.alert .metric-card-value {
+            color: #e54747;
+        }
+
+        .metric-card-label {
+            font-size: 13px;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 500;
+        }
+
+        .findings-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .finding-card {
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 12px;
+            border-left: 4px solid #8247e5;
+        }
+
+        .finding-card.positive {
+            border-left-color: #00a868;
+            background: #e8f9f0;
+        }
+
+        .finding-card.negative {
+            border-left-color: #e54747;
+            background: #fee;
+        }
+
+        .finding-card.neutral {
+            border-left-color: #ff6600;
+            background: #fff3e0;
+        }
+
+        .finding-title {
+            font-size: 17px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .finding-desc {
+            font-size: 14px;
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 12px;
+        }
+
+        .finding-stat {
+            display: inline-block;
+            background: white;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            margin-top: 8px;
+        }
+
+        .finding-card.positive .finding-stat {
+            color: #00a868;
+        }
+
+        .finding-card.negative .finding-stat {
+            color: #e54747;
+        }
+
+        .finding-card.neutral .finding-stat {
+            color: #ff6600;
+        }
+
+        .monthly-breakdown {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-top: 20px;
+        }
+
+        .month-card {
+            background: white;
+            padding: 16px;
+            border-radius: 10px;
+            border: 2px solid #e0e0e0;
+            transition: all 0.3s;
+        }
+
+        .month-card:hover {
+            border-color: #8247e5;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(130, 71, 229, 0.15);
+        }
+
+        .month-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: #8247e5;
+            margin-bottom: 12px;
+        }
+
+        .month-stat {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 6px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .month-stat strong {
+            color: #333;
+            font-weight: 600;
+        }
+
+        .visual-findings {
+            margin-top: 40px;
+            padding: 30px;
+            background: #f9f9f9;
+            border-radius: 12px;
+            border: 2px solid #8247e5;
+        }
+
+        .visual-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: #8247e5;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .performance-bar {
+            margin-bottom: 16px;
+            background: white;
+            padding: 16px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .squad-name {
+            font-size: 15px;
+            font-weight: 600;
+            color: #8247e5;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .bar-container {
+            width: 100%;
+            height: 30px;
+            background: #f0f0f0;
+            border-radius: 6px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .bar-fill {
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 12px;
+            color: white;
+            font-weight: 700;
+            font-size: 14px;
+            transition: width 0.5s ease;
+        }
+
+        .bar-fill.high {
+            background: linear-gradient(90deg, #00a868 0%, #00c97a 100%);
+        }
+
+        .bar-fill.medium {
+            background: linear-gradient(90deg, #ffa726 0%, #ffb74d 100%);
+        }
+
+        .bar-fill.low {
+            background: linear-gradient(90deg, #e54747 0%, #ef5350 100%);
+        }
+
+        .completion-table {
+            width: 100%;
+            margin-top: 24px;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        .completion-table thead {
+            background: #8247e5;
+            color: white;
+        }
+
+        .completion-table th {
+            padding: 14px 12px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 13px;
+        }
+
+        .completion-table td {
+            padding: 12px;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 14px;
+        }
+
+        .completion-table tbody tr:hover {
+            background: #f9f9f9;
+        }
+
+        .completion-table .squad-col {
+            color: #8247e5;
+            font-weight: 600;
+        }
+
+        .completion-table .high-val {
+            color: #00a868;
+            font-weight: 600;
+        }
+
+        .completion-table .low-val {
+            color: #e54747;
+            font-weight: 600;
+        }
+
+        .highlight-box {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+            border-left: 4px solid #ff6600;
+        }
+
+        .highlight-box h4 {
+            font-size: 16px;
+            font-weight: 600;
+            color: #ff6600;
+            margin-bottom: 12px;
+        }
+
+        .highlight-box ul {
+            margin-left: 20px;
+        }
+
+        .highlight-box li {
+            margin-bottom: 8px;
+            line-height: 1.6;
+            color: #666;
+        }
+
+        @media (max-width: 768px) {
+            .metrics-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .findings-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .monthly-breakdown {
+                grid-template-columns: 1fr;
+            }
+            .impact-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .content {
+                padding: 24px;
+            }
+            
+            .header {
+                padding: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="slide-container">
+        <!-- SLIDE 1: ANÁLISIS DE IMPACTO -->
+        <div class="slide active" id="slide1">
+            <div class="container">
+                <div class="header">
+                    <h1>📊 Análisis de Impacto</h1>
+                    <p>Nueva Implementación de Creación de Material · Xpeers & BPOs</p>
+                </div>
+
+                <div class="content">
+
+            <!-- PROS -->
+            <div class="section">
+                <h2 class="section-title pros">✅ VENTAJAS</h2>
+                
+                <div class="subsection">
+                    <h3>🎯 Calidad y Especialización</h3>
+                    <div class="list-item">
+                        <strong>Guía experta</strong>
+                        <div class="list-item-desc">El material es supervisado y validado por especialistas del squad Cx Academy, garantizando expertise técnico en cada entrega</div>
+                    </div>
+                    <div class="list-item">
+                        <strong>Conocimiento profundo</strong>
+                        <div class="list-item-desc">El equipo de Cx Academy domina las dinámicas operativas reales y comprende el contexto de implementación</div>
+                    </div>
+                    <div class="list-item">
+                        <strong>Procesos correctos</strong>
+                        <div class="list-item-desc">Se asegura el cumplimiento de estándares y metodologías establecidas por la organización</div>
+                    </div>
+                    <div class="list-item">
+                        <strong>Consistencia</strong>
+                        <div class="list-item-desc">Todos los materiales mantienen criterios unificados, lenguaje coherente y estructura estandarizada</div>
+                    </div>
+                    
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Aspecto Cualitativo</th>
+                                <th>Impacto Cuantitativo</th>
+                                <th>Justificación</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Calidad percibida</td>
+                                <td><span class="metric-value positive">+85%</span></td>
+                                <td>Validación experta del squad Cx Academy garantiza estándares técnicos superiores</td>
+                            </tr>
+                            <tr>
+                                <td>Alineación a procesos</td>
+                                <td><span class="metric-value positive">100%</span></td>
+                                <td>Supervisión directa asegura cumplimiento total de metodologías organizacionales</td>
+                            </tr>
+                            <tr>
+                                <td>Reducción errores críticos</td>
+                                <td><span class="metric-value positive">-70%</span></td>
+                                <td>Revisión especializada detecta y corrige inconsistencias antes de publicación</td>
+                            </tr>
+                            <tr>
+                                <td>Uniformidad de contenido</td>
+                                <td><span class="metric-value positive">+90%</span></td>
+                                <td>Criterios unificados aplicados por el mismo equipo experto en todos los materiales</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="subsection">
+                    <h3>📈 Beneficios Estratégicos</h3>
+                    <div class="list-item">
+                        <strong>Reducción de errores</strong>
+                        <div class="list-item-desc">La validación técnica antes de la publicación minimiza errores conceptuales que podrían afectar a usuarios finales</div>
+                    </div>
+                    <div class="list-item">
+                        <strong>Alineación organizacional</strong>
+                        <div class="list-item-desc">El material generado mantiene coherencia con los objetivos estratégicos del negocio y las directrices corporativas</div>
+                    </div>
+                    <div class="list-item">
+                        <strong>Transferencia de conocimiento</strong>
+                        <div class="list-item-desc">El equipo operativo aprende continuamente de las correcciones y feedback, elevando competencias técnicas</div>
+                    </div>
+                    
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Aspecto Cualitativo</th>
+                                <th>Impacto Cuantitativo</th>
+                                <th>Justificación</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Reducción de incidencias</td>
+                                <td><span class="metric-value positive">-65%</span></td>
+                                <td>Validación previa minimiza errores conceptuales que lleguen a usuarios finales</td>
+                            </tr>
+                            <tr>
+                                <td>Adherencia estratégica</td>
+                                <td><span class="metric-value positive">+75%</span></td>
+                                <td>Alineación directa con objetivos del negocio mediante supervisión experta constante</td>
+                            </tr>
+                            <tr>
+                                <td>Competencias técnicas</td>
+                                <td><span class="metric-value positive">+60%</span></td>
+                                <td>Aprendizaje continuo del equipo operativo a través del feedback especializado recibido</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- CONS -->
+            <div class="section">
+                <h2 class="section-title cons">⚠️ DESVENTAJAS</h2>
+                
+                <div class="subsection">
+                    <h3>⏱️ Tiempo e Ineficiencias</h3>
+                    <div class="list-item">
+                        <strong>Ciclo de revisión extenso</strong>
+                        <div class="list-item-desc">El tiempo entre creación del material y aprobación final se ha incrementado significativamente, generando demoras en entregas</div>
+                    </div>
+                    <div class="list-item">
+                        <strong>Cuellos de botella</strong>
+                        <div class="list-item-desc">La dependencia del squad Cx Academy para validación crea puntos de congestión que ralentizan todo el proceso</div>
+                    </div>
+                    <div class="list-item">
+                        <strong>Velocidad de entrega</strong>
+                        <div class="list-item-desc">Los retrasos impactan la disponibilidad oportuna de material crítico para Xpeers y BPOs</div>
+                    </div>
+                    
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Aspecto Cualitativo</th>
+                                <th>Impacto Cuantitativo</th>
+                                <th>Justificación</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Aumento en tiempo promedio</td>
+                                <td><span class="metric-value negative">+150%</span></td>
+                                <td>Dependencia de validación externa añade etapas de espera y revisión al flujo</td>
+                            </tr>
+                            <tr>
+                                <td>Espera promedio</td>
+                                <td><span class="metric-value negative">3-5 días</span></td>
+                                <td>Carga de trabajo del squad Cx Academy genera retrasos en respuestas y aprobaciones</td>
+                            </tr>
+                            <tr>
+                                <td>Reducción velocidad publicación</td>
+                                <td><span class="metric-value negative">-40%</span></td>
+                                <td>Cuellos de botella en la validación ralentizan la cadena completa de producción</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="subsection">
+                    <h3>🔄 Reproceso y Desalineación</h3>
+                    <div class="list-item">
+                        <strong>Diferencias de expectativas</strong>
+                        <div class="list-item-desc">Existe un gap significativo entre lo que el equipo crea inicialmente y lo que Cx Academy espera recibir</div>
+                    </div>
+                    <div class="list-item">
+                        <strong>Retrabajo constante</strong>
+                        <div class="list-item-desc">Los materiales requieren múltiples iteraciones y correcciones para alcanzar el estándar esperado</div>
+                    </div>
+                    <div class="list-item">
+                        <strong>Comunicación deficiente</strong>
+                        <div class="list-item-desc">La falta de claridad en requisitos iniciales genera malentendidos y rechazos evitables</div>
+                    </div>
+                    <div class="list-item">
+                        <strong>Frustración del equipo</strong>
+                        <div class="list-item-desc">Las correcciones repetitivas generan desmotivación y afectan el clima laboral del squad</div>
+                    </div>
+                    
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Aspecto Cualitativo</th>
+                                <th>Impacto Cuantitativo</th>
+                                <th>Justificación</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Materiales con cambios requeridos</td>
+                                <td><span class="metric-value negative">60%</span></td>
+                                <td>Gap de expectativas entre creadores y validadores genera desalineación constante</td>
+                            </tr>
+                            <tr>
+                                <td>Revisiones promedio</td>
+                                <td><span class="metric-value negative">2.8</span></td>
+                                <td>Múltiples iteraciones necesarias por falta de claridad en requisitos iniciales</td>
+                            </tr>
+                            <tr>
+                                <td>Rechazos por malentendidos</td>
+                                <td><span class="metric-value negative">45%</span></td>
+                                <td>Comunicación deficiente de estándares genera rechazos evitables del material</td>
+                            </tr>
+                            <tr>
+                                <td>Reducción satisfacción laboral</td>
+                                <td><span class="metric-value negative">-35%</span></td>
+                                <td>Expectativas desalineadas generan múltiples correcciones donde el tiempo invertido se percibe como perdido en vez de provechoso, provocando desmotivación</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="subsection">
+                    <h3>📊 Costos Operativos</h3>
+                    <div class="list-item">
+                        <strong>Horas desperdiciadas</strong>
+                        <div class="list-item-desc">Se invierte tiempo significativo en versiones que finalmente son rechazadas, representando costo operativo directo</div>
+                    </div>
+                    <div class="list-item">
+                        <strong>Menor productividad</strong>
+                        <div class="list-item-desc">Los recursos del equipo se destinan a reprocesar material existente en lugar de crear nuevas iniciativas e innovar</div>
+                    </div>
+                    <div class="list-item">
+                        <strong>Oportunidad perdida</strong>
+                        <div class="list-item-desc">El contenido no llega a tiempo a la audiencia objetivo, perdiendo ventanas de implementación críticas</div>
+                    </div>
+                    
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Aspecto Cualitativo</th>
+                                <th>Impacto Cuantitativo</th>
+                                <th>Justificación</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Horas desperdiciadas por material</td>
+                                <td><span class="metric-value negative">12-15h</span></td>
+                                <td>Retrabajo en versiones rechazadas representa costo operativo directo significativo</td>
+                            </tr>
+                            <tr>
+                                <td>Reducción capacidad innovación</td>
+                                <td><span class="metric-value negative">-50%</span></td>
+                                <td>Recursos destinados a reproceso limitan tiempo para crear contenido nuevo</td>
+                            </tr>
+                            <tr>
+                                <td>Entregas fuera de plazo</td>
+                                <td><span class="metric-value negative">25%</span></td>
+                                <td>Retrasos en validación impiden cumplir ventanas críticas de implementación</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- IMPACTO -->
+            <div class="section">
+                <h2 class="section-title impact">💡 IMPACTO EN EL SQUAD</h2>
+                
+                <div class="impact-grid">
+                    <div class="impact-box positive">
+                        <h4>Positivo</h4>
+                        <div class="impact-item">✓ <strong>Aprendizaje de estándares:</strong> El equipo adquiere conocimiento de estándares de calidad y mejores prácticas</div>
+                        <div class="impact-item">✓ <strong>Reducción de errores:</strong> Menos materiales con errores críticos llegan a usuarios finales</div>
+                        
+                        <table class="data-table" style="margin-top: 12px;">
+                            <thead>
+                                <tr>
+                                    <th>Cualitativo</th>
+                                    <th>Cuantitativo</th>
+                                    <th>Justificación</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Aprendizaje</td>
+                                    <td><span class="metric-value positive">+60%</span></td>
+                                    <td>Feedback continuo eleva conocimiento de estándares y mejores prácticas</td>
+                                </tr>
+                                <tr>
+                                    <td>Reducción errores</td>
+                                    <td><span class="metric-value positive">-70%</span></td>
+                                    <td>Doble revisión filtra inconsistencias técnicas antes de llegar a usuarios</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="impact-box negative">
+                        <h4>Negativo</h4>
+                        <div class="impact-item">✗ <strong>Carga operativa:</strong> Incremento significativo en volumen de trabajo por revisiones múltiples</div>
+                        <div class="impact-item">✗ <strong>Dependencia externa:</strong> Pérdida de autonomía al depender completamente de aprobaciones de Cx Academy</div>
+                        <div class="impact-item">✗ <strong>Autonomía reducida:</strong> El equipo tiene menos capacidad de decisión sobre el material que produce</div>
+                        <div class="impact-item">✗ <strong>Riesgo de burnout:</strong> Los reprocesos constantes aumentan el estrés y agotamiento del equipo</div>
+                        
+                        <table class="data-table" style="margin-top: 12px;">
+                            <thead>
+                                <tr>
+                                    <th>Cualitativo</th>
+                                    <th>Cuantitativo</th>
+                                    <th>Justificación</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Carga operativa</td>
+                                    <td><span class="metric-value negative">+120%</span></td>
+                                    <td>Revisiones múltiples duplican esfuerzo en cada pieza de material producido</td>
+                                </tr>
+                                <tr>
+                                    <td>Dependencia</td>
+                                    <td><span class="metric-value negative">100%</span></td>
+                                    <td>Nada puede publicarse sin aprobación externa del squad Cx Academy</td>
+                                </tr>
+                                <tr>
+                                    <td>Autonomía</td>
+                                    <td><span class="metric-value negative">-55%</span></td>
+                                    <td>Equipo pierde capacidad de decisión sobre contenido que ellos mismos crean</td>
+                                </tr>
+                                <tr>
+                                    <td>Riesgo burnout</td>
+                                    <td><span class="metric-value negative">+40%</span></td>
+                                    <td>Reprocesos constantes y falta de autonomía elevan estrés y agotamiento</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RECOMENDACIONES -->
+            <div class="section">
+                <h2 class="section-title recommendations">🎯 RECOMENDACIONES</h2>
+                
+                <div class="recommendation-item">
+                    <strong>1. Templates claros</strong>
+                    <div class="list-item-desc">Crear plantillas con especificaciones detalladas que documenten claramente qué espera Cx Academy en cada tipo de material</div>
+                </div>
+                <div class="recommendation-item">
+                    <strong>2. Checklist de validación</strong>
+                    <div class="list-item-desc">Implementar guía pre-envío con criterios de validación para que el equipo auto-revise antes de someter a aprobación</div>
+                </div>
+                <div class="recommendation-item">
+                    <strong>3. Sesión de alineación</strong>
+                    <div class="list-item-desc">Realizar reunión inicial entre equipos para clarificar expectativas, alcance y estándares por tipo de material</div>
+                </div>
+                <div class="recommendation-item">
+                    <strong>4. Feedback estructurado</strong>
+                    <div class="list-item-desc">Estandarizar formato de comentarios en revisiones: específicos, accionables y con ejemplos para facilitar correcciones</div>
+                </div>
+                <div class="recommendation-item">
+                    <strong>5. Escalamiento por prioridad</strong>
+                    <div class="list-item-desc">Establecer fast-track para materiales urgentes con SLA diferenciado según criticidad del contenido</div>
+                </div>
+                
+                <table class="data-table" style="margin-top: 20px;">
+                    <thead>
+                        <tr>
+                            <th>Acción Cualitativa</th>
+                            <th>Reducción Esperada</th>
+                            <th>Justificación</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Templates claros</td>
+                            <td><span class="metric-value warning">-50%</span> rechazos</td>
+                            <td>Especificaciones detalladas eliminan ambigüedad en expectativas iniciales</td>
+                        </tr>
+                        <tr>
+                            <td>Checklist validación</td>
+                            <td><span class="metric-value warning">-35%</span> reprocesos</td>
+                            <td>Auto-revisión previa detecta errores antes de envío formal a validación</td>
+                        </tr>
+                        <tr>
+                            <td>Sesión de alineación</td>
+                            <td><span class="metric-value warning">-60%</span> desalineación</td>
+                            <td>Clarificación inicial reduce brechas de entendimiento entre equipos</td>
+                        </tr>
+                        <tr>
+                            <td>Feedback estructurado</td>
+                            <td><span class="metric-value warning">-40%</span> tiempo revisión</td>
+                            <td>Comentarios específicos y accionables aceleran proceso de corrección</td>
+                        </tr>
+                        <tr>
+                            <td>Escalamiento por prioridad</td>
+                            <td><span class="metric-value warning">-70%</span> demoras críticas</td>
+                            <td>Fast-track para urgentes evita cuellos de botella en contenido prioritario</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 2: REPORTES DE ENTRENAMIENTOS -->
+        <div class="slide" id="slide2">
+            <div class="container">
+                <div class="header">
+                    <h1>📊 Reportes de Entrenamientos</h1>
+                    <p>Análisis Mensual · Entrenamientos ACQ</p>
+                </div>
+
+                <div class="content">
+
+                <!-- CONTRAS -->
+                <div class="section">
+                    <h2 class="section-title" style="color: #e54747; border-bottom-color: #e54747;">⚠️ CONTRAS</h2>
+                    
+                    <div class="subsection">
+                        <div class="list-item">
+                            <strong>Información desactualizada en el canal Cx Academy</strong>
+                            <div class="list-item-desc">La información reportada en el canal de Cx Academy no está actualizada antes de hacer el reporte, generando discrepancias con la realidad operativa</div>
+                        </div>
+                        <div class="list-item">
+                            <strong>Fricción con los squads</strong>
+                            <div class="list-item-desc">Se reporta internamente en cada squad que ciertos Xpeers no han realizado el entrenamiento, pero ellos confirman que sí lo completaron, creando conflictos y desconfianza en el proceso de reporte</div>
+                        </div>
+                        <div class="list-item">
+                            <strong>Impacto negativo en Xpeer Challenge</strong>
+                            <div class="list-item-desc">Los reportes erróneos generan evaluaciones negativas en el Xpeer Challenge, indicando incumplimiento de entrenamientos cuando en realidad sí fueron completados, afectando injustamente el desempeño registrado</div>
+                        </div>
+                        <div class="list-item">
+                            <strong>Reporte del 7 de noviembre: Evidencia del problema</strong>
+                            <div class="list-item-desc">En el último reporte realizado el viernes 7 de noviembre, se posicionó al squad como uno de los de peor desempeño. Al revisar caso por caso, se evidenció que muchos de los casos reportados como "no realizados" ya se encontraban completados, afectando negativamente tanto al Xpeer individual como al desempeño general del squad</div>
+                        </div>
+                        <div class="list-item">
+                            <strong>Inconsistencia entre reportes: Cambio de datos</strong>
+                            <div class="list-item-desc">Se identificó que @alexa compartió un reporte inicial que fue extraído por @alep. Posteriormente, después de un tiempo, la data fue modificada mostrando información actualizada completamente diferente. Esta inconsistencia entre el primer y segundo reporte evidencia falta de confiabilidad en los datos compartidos inicialmente. <a href="https://docs.google.com/spreadsheets/d/1L07G4MCg0voMgtQBT17ORoODiri3xMMokfCst9kEGU8/edit?gid=744534340#gid=744534340" target="_blank" style="color: #8247e5; text-decoration: underline;">Ver evidencia en spreadsheet</a></div>
+                        </div>
+                        <div class="list-item">
+                            <strong>⚠️ Proceso de descarga de datos desactualizado</strong>
+                            <div class="list-item-desc">Cx Academy reconoce que descargan la data semanalmente (los lunes) como "fecha de corte". Cualquier persona que complete el entrenamiento después de esa fecha aparece como "Sin realizar", aunque ya lo haya completado. Este proceso manual genera reportes con datos NO actualizados que penalizan injustamente a los Xpeers y requieren verificación manual constante hasta que implementen un dashboard automático diario</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- EXPLICACIÓN DEL PROCESO CX ACADEMY -->
+                <div class="visual-findings" style="background: #fff3e0; border-color: #ff6600; margin-top: 30px;">
+                    <h3 class="visual-title" style="color: #ff6600;">⚙️ Proceso Actual de Cx Academy: Limitaciones Reconocidas</h3>
+                    
+                    <div style="background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+                        <h4 style="font-size: 16px; font-weight: 600; color: #ff6600; margin-bottom: 12px;">📥 Cómo funciona actualmente:</h4>
+                        <ul style="margin-left: 20px; line-height: 1.8;">
+                            <li>Descarga de datos: <strong>Semanalmente los lunes</strong></li>
+                            <li>Fecha de corte: <strong>Fija al momento de descarga</strong></li>
+                            <li>Entrenamientos posteriores: <strong>No se reflejan en el reporte</strong></li>
+                            <li>Actualización: <strong>Manual, no automática</strong></li>
+                            <li>Dashboard diario: <strong>Pendiente de implementación futura</strong></li>
+                        </ul>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+                        <div style="background: #fee; padding: 20px; border-radius: 8px; border-left: 4px solid #e54747;">
+                            <h4 style="font-size: 15px; font-weight: 600; color: #e54747; margin-bottom: 12px;">❌ Problemas que esto genera:</h4>
+                            <ul style="margin-left: 20px; font-size: 13px; line-height: 1.6;">
+                                <li><strong>Datos desactualizados:</strong> La información NO refleja la realidad actual</li>
+                                <li><strong>Penalización injusta:</strong> Xpeers que SÍ completaron aparecen como incumplidores</li>
+                                <li><strong>Trabajo manual extra:</strong> Los squads deben verificar caso por caso</li>
+                                <li><strong>Evaluaciones incorrectas:</strong> Impacto negativo en Xpeer Challenge basado en datos erróneos</li>
+                                <li><strong>Fricción operativa:</strong> Tiempo desperdiciado en aclaraciones y verificaciones</li>
+                            </ul>
+                        </div>
+
+                        <div style="background: white; padding: 20px; border-radius: 8px; border-left: 4px solid #8247e5;">
+                            <h4 style="font-size: 15px; font-weight: 600; color: #8247e5; margin-bottom: 12px;">✓ Lo que Cx Academy recomienda hacer:</h4>
+                            <ul style="margin-left: 20px; font-size: 13px; line-height: 1.6;">
+                                <li>Confirmar si ya lo realizó (fuera de fecha)</li>
+                                <li>Verificar novedades: vacaciones, incapacidad, retiro, licencia</li>
+                                <li>Indagar por qué no se realizó en fecha establecida</li>
+                            </ul>
+                            <p style="margin-top: 12px; padding: 12px; background: #f0eeff; border-radius: 6px; font-size: 12px; color: #666;">
+                                <strong style="color: #8247e5;">Nota:</strong> Estas recomendaciones transfieren la carga de verificación a los squads, duplicando el trabajo operativo.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div style="background: #e54747; color: white; padding: 20px; border-radius: 8px; text-align: center;">
+                        <h4 style="font-size: 18px; font-weight: 700; margin-bottom: 12px;">🔴 Conclusión: Proceso Problemático</h4>
+                        <p style="font-size: 14px; line-height: 1.6; margin: 0;">
+                            Aunque Cx Academy reconoce las limitaciones de su proceso actual, <strong>siguen compartiendo reportes con datos desactualizados</strong> que generan impacto negativo en los squads. La solución (dashboard automático diario) está pendiente sin fecha definida, mientras los equipos continúan siendo evaluados con información incorrecta.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- EVIDENCIA DE INCONSISTENCIA -->
+                <div class="visual-findings" style="background: #fee; border-color: #e54747;">
+                    <h3 class="visual-title" style="color: #e54747;">📋 Análisis Detallado: Estados de Entrenamientos Octubre</h3>
+                    <p style="color: #666; margin-bottom: 20px; font-size: 14px;">Comparación entre el reporte oficial de Cx Academy y el análisis manual realizado por @alep</p>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 24px;">
+                        <div style="background: white; padding: 20px; border-radius: 8px; border: 2px solid #e54747;">
+                            <h4 style="font-size: 16px; font-weight: 600; color: #e54747; margin-bottom: 16px; text-align: center;">📊 Reporte Oficial (Cx Academy)</h4>
+                            <div style="text-align: center; padding: 20px;">
+                                <div style="font-size: 56px; font-weight: 700; color: #e54747; margin-bottom: 8px;">21</div>
+                                <div style="font-size: 14px; color: #666; margin-bottom: 20px;">Entrenamientos reportados como "Sin iniciar"</div>
+                                <div style="background: #fee; padding: 16px; border-radius: 8px; font-size: 13px; color: #666;">
+                                    <strong style="color: #e54747;">Estado reportado:</strong> Pendientes de completar
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style="background: white; padding: 20px; border-radius: 8px; border: 2px solid #00a868;">
+                            <h4 style="font-size: 16px; font-weight: 600; color: #00a868; margin-bottom: 16px; text-align: center;">✅ Análisis Manual (@alep)</h4>
+                            <div style="text-align: center; padding: 20px;">
+                                <div style="font-size: 56px; font-weight: 700; color: #00a868; margin-bottom: 8px;">8</div>
+                                <div style="font-size: 14px; color: #666; margin-bottom: 20px;">Entrenamientos REALMENTE sin iniciar después de verificar</div>
+                                <div style="background: #e8f9f0; padding: 16px; border-radius: 8px; font-size: 13px; color: #666;">
+                                    <strong style="color: #00a868;">Estado real:</strong> Los otros 13 ya estaban completados
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 12px rgba(130, 71, 229, 0.15); margin-bottom: 24px;">
+                        <div style="display: flex; align-items: center; justify-content: center; gap: 40px;">
+                            <div style="text-align: center;">
+                                <div style="font-size: 18px; color: #666; margin-bottom: 8px;">Reportado incorrectamente</div>
+                                <div style="font-size: 42px; font-weight: 700; color: #e54747;">13</div>
+                            </div>
+                            <div style="font-size: 48px; color: #ccc;">→</div>
+                            <div style="text-align: center;">
+                                <div style="font-size: 18px; color: #666; margin-bottom: 8px;">Reducción en pendientes</div>
+                                <div style="font-size: 42px; font-weight: 700; color: #00a868;">-61.9%</div>
+                            </div>
+                        </div>
+                        <p style="text-align: center; margin-top: 16px; font-size: 13px; color: #666; font-style: italic;">
+                            De 21 entrenamientos reportados como "Sin iniciar", solo 8 estaban realmente pendientes
+                        </p>
+                    </div>
+
+                    <div style="background: white; padding: 24px; border-radius: 12px; border: 3px solid #e54747; margin-bottom: 20px;">
+                        <h4 style="font-size: 18px; font-weight: 700; color: #e54747; margin-bottom: 16px; text-align: center;">🔍 Casos Específicos de Discrepancia</h4>
+                        
+                        <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+                            <thead style="background: #f9f9f9;">
+                                <tr>
+                                    <th style="padding: 10px; text-align: left; border-bottom: 2px solid #ddd;">Nombre Xpeer</th>
+                                    <th style="padding: 10px; text-align: left; border-bottom: 2px solid #ddd;">Entrenamiento</th>
+                                    <th style="padding: 10px; text-align: center; border-bottom: 2px solid #ddd;">Reportado por Cx Academy</th>
+                                    <th style="padding: 10px; text-align: center; border-bottom: 2px solid #ddd;">Estado Real (@alep)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td style="padding: 10px; border-bottom: 1px solid #eee;">Sanchez, Sarai</td>
+                                    <td style="padding: 10px; border-bottom: 1px solid #eee; font-size: 12px;">Test + Encuesta (Customer security)</td>
+                                    <td style="padding: 10px; text-align: center; border-bottom: 1px solid #eee; color: #e54747; font-weight: 600;">No iniciado</td>
+                                    <td style="padding: 10px; text-align: center; border-bottom: 1px solid #eee; color: #00a868; font-weight: 600;">Concluido ✓</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 10px; border-bottom: 1px solid #eee;">Rueda, Diego</td>
+                                    <td style="padding: 10px; border-bottom: 1px solid #eee; font-size: 12px;">Test + Encuesta (Customer security)</td>
+                                    <td style="padding: 10px; text-align: center; border-bottom: 1px solid #eee; color: #e54747; font-weight: 600;">No iniciado</td>
+                                    <td style="padding: 10px; text-align: center; border-bottom: 1px solid #eee; color: #00a868; font-weight: 600;">Concluido ✓</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 10px; border-bottom: 1px solid #eee;">Neira, Maria José</td>
+                                    <td style="padding: 10px; border-bottom: 1px solid #eee; font-size: 12px;">Test + Encuesta (Customer security)</td>
+                                    <td style="padding: 10px; text-align: center; border-bottom: 1px solid #eee; color: #e54747; font-weight: 600;">No iniciado</td>
+                                    <td style="padding: 10px; text-align: center; border-bottom: 1px solid #eee; color: #00a868; font-weight: 600;">Concluido ✓</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 10px; border-bottom: 1px solid #eee;">Alvarez, Angela</td>
+                                    <td style="padding: 10px; border-bottom: 1px solid #eee; font-size: 12px;">Test + Encuesta (Customer security)</td>
+                                    <td style="padding: 10px; text-align: center; border-bottom: 1px solid #eee; color: #e54747; font-weight: 600;">No iniciado</td>
+                                    <td style="padding: 10px; text-align: center; border-bottom: 1px solid #eee; color: #00a868; font-weight: 600;">Concluido ✓</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 10px; border-bottom: 1px solid #eee;">Rubiano, Camilo</td>
+                                    <td style="padding: 10px; border-bottom: 1px solid #eee; font-size: 12px;">CSI - Onboarding live channels</td>
+                                    <td style="padding: 10px; text-align: center; border-bottom: 1px solid #eee; color: #e54747; font-weight: 600;">No iniciado</td>
+                                    <td style="padding: 10px; text-align: center; border-bottom: 1px solid #eee; color: #00a868; font-weight: 600;">Concluido ✓</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 10px; border-bottom: 1px solid #eee;">Sanchez, Sarai</td>
+                                    <td style="padding: 10px; border-bottom: 1px solid #eee; font-size: 12px;">CSI - Onboarding live channels</td>
+                                    <td style="padding: 10px; text-align: center; border-bottom: 1px solid #eee; color: #ff6600; font-weight: 600;">Iniciado</td>
+                                    <td style="padding: 10px; text-align: center; border-bottom: 1px solid #eee; color: #00a868; font-weight: 600;">Concluido ✓</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 10px; border-bottom: 1px solid #eee;">Rueda, Diego</td>
+                                    <td style="padding: 10px; border-bottom: 1px solid #eee; font-size: 12px;">CSI - Onboarding live channels</td>
+                                    <td style="padding: 10px; text-align: center; border-bottom: 1px solid #eee; color: #e54747; font-weight: 600;">No iniciado</td>
+                                    <td style="padding: 10px; text-align: center; border-bottom: 1px solid #eee; color: #00a868; font-weight: 600;">Concluido ✓</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 10px; border-bottom: 1px solid #eee;">Alvarez, Angela</td>
+                                    <td style="padding: 10px; border-bottom: 1px solid #eee; font-size: 12px;">Préstamo Nu - General</td>
+                                    <td style="padding: 10px; text-align: center; border-bottom: 1px solid #eee; color: #e54747; font-weight: 600;">No iniciado</td>
+                                    <td style="padding: 10px; text-align: center; border-bottom: 1px solid #eee; color: #00a868; font-weight: 600;">Concluido ✓</td>
+                                </tr>
+                                <tr style="background: #fff9f0;">
+                                    <td colspan="4" style="padding: 12px; text-align: center; font-size: 12px; color: #666; font-style: italic;">
+                                        + 5 casos adicionales con la misma discrepancia (13 casos totales de 21 reportados)
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div style="background: #fff3e0; padding: 20px; border-radius: 8px; border-left: 4px solid #ff6600;">
+                        <h4 style="font-size: 16px; font-weight: 600; color: #ff6600; margin-bottom: 12px;">📊 Impacto de la Discrepancia</h4>
+                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 16px;">
+                            <div style="text-align: center;">
+                                <div style="font-size: 32px; font-weight: 700; color: #e54747;">61.9%</div>
+                                <div style="font-size: 13px; color: #666;">De los reportados como pendientes YA estaban completados</div>
+                            </div>
+                            <div style="text-align: center;">
+                                <div style="font-size: 32px; font-weight: 700; color: #e54747;">13/21</div>
+                                <div style="font-size: 13px; color: #666;">Casos con información incorrecta</div>
+                            </div>
+                            <div style="text-align: center;">
+                                <div style="font-size: 32px; font-weight: 700; color: #00a868;">100%</div>
+                                <div style="font-size: 13px; color: #666;">Verificación requirió análisis manual</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- HALLAZGOS VISUALES -->
+                <div class="visual-findings" style="margin-top: 30px;">
+                    <h3 class="visual-title">🏆 Performance ACQ en Completion Total</h3>
+                    
+                    <div class="performance-bar" style="max-width: 600px;">
+                        <div class="squad-name">Nubank | Acquisition (ACQ)</div>
+                        <div class="bar-container">
+                            <div class="bar-fill medium" style="width: 68.25%;">68.25%</div>
+                        </div>
+                    </div>
+
+                    <p style="font-size: 14px; color: #666; margin-top: 16px;">
+                        <strong>Posición:</strong> 8º lugar de 9 squads evaluados
+                    </p>
+                    
+                    <p style="font-size: 12px; color: #666; margin-top: 8px; font-style: italic;">
+                        Nota: La barra se colorea en amarillo (60-80%) indicando rendimiento medio con oportunidad de mejora.
+                    </p>
+
+                    <!-- TABLA DE COMPLETION PROMEDIO ACQ -->
+                    <h3 class="visual-title" style="margin-top: 40px;">📊 Desglose de Completion - Squad ACQ</h3>
+                    
+                    <table class="completion-table" style="max-width: 800px;">
+                        <thead>
+                            <tr>
+                                <th>Equipo (Squad)</th>
+                                <th>Finalizado (%)</th>
+                                <th>Realizado fuera de fecha límite (%)</th>
+                                <th>Sin Realizar (%)</th>
+                                <th>Completion Total (%)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr style="background: #fff3e0;">
+                                <td class="squad-col" style="font-weight: 700; font-size: 15px;">Nubank | Acquisition (ACQ)</td>
+                                <td style="font-weight: 600;">63.49%</td>
+                                <td style="font-weight: 600;">4.76%</td>
+                                <td class="low-val" style="font-weight: 700; font-size: 15px;">31.75%</td>
+                                <td style="font-weight: 700; font-size: 15px; color: #ff6600;">68.25%</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <div style="margin-top: 20px; padding: 16px; background: white; border-radius: 8px; border-left: 4px solid #ff6600; max-width: 800px;">
+                        <p style="font-size: 14px; color: #666; line-height: 1.6; margin: 0;">
+                            <strong style="color: #ff6600;">Análisis:</strong> El squad ACQ presenta un 31.75% de entrenamientos sin realizar, lo que representa un área crítica de mejora. El 4.76% realizado fuera de fecha límite indica oportunidad para mejorar la gestión de tiempos.
+                        </p>
+                    </div>
+                </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 3: CONCLUSIONES Y NECESIDAD DE ENTRENAMIENTOS -->
+        <div class="slide" id="slide3">
+            <div class="container">
+                <div class="header">
+                    <h1>📝 Conclusiones y Recomendaciones</h1>
+                    <p>Síntesis de hallazgos · Mejoras necesarias</p>
+                </div>
+
+                <div class="content">
+
+                <!-- CONCLUSIONES -->
+                <div class="section">
+                    <h2 class="section-title" style="color: #8247e5; border-bottom-color: #8247e5;">💡 CONCLUSIONES</h2>
+                    
+                    <div class="subsection">
+                        <div class="list-item">
+                            <strong>1. Problema crítico de confiabilidad de datos</strong>
+                            <div class="list-item-desc">Los reportes compartidos por Cx Academy contienen información desactualizada que no refleja la realidad. De 21 entrenamientos reportados como "Sin iniciar", solo 8 estaban realmente pendientes (61.9% de error)</div>
+                        </div>
+                        <div class="list-item">
+                            <strong>2. Impacto en evaluación de desempeño</strong>
+                            <div class="list-item-desc">El squad ACQ fue posicionado en 8º lugar de 9 squads basándose en datos incorrectos, afectando la percepción de desempeño y generando impacto negativo en el Xpeer Challenge de colaboradores que SÍ cumplieron</div>
+                        </div>
+                        <div class="list-item">
+                            <strong>3. Proceso manual obsoleto y reconocido</strong>
+                            <div class="list-item-desc">Cx Academy reconoce que su proceso de descarga semanal con fecha de corte genera datos inexactos, pero continúan usando este método mientras implementan un dashboard automático sin fecha definida</div>
+                        </div>
+                        <div class="list-item">
+                            <strong>4. Transferencia de carga operativa</strong>
+                            <div class="list-item-desc">Los squads deben realizar verificación manual caso por caso para validar los datos reportados, duplicando el trabajo operativo y generando fricción innecesaria</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- NECESIDAD DE ENTRENAMIENTOS -->
+                <div class="section">
+                    <h2 class="section-title" style="color: #ff6600; border-bottom-color: #ff6600;">💼 OPORTUNIDAD DE MEJORA: Determinación de Necesidad de Entrenamientos</h2>
+                    
+                    <div style="background: #fff3e0; padding: 24px; border-radius: 12px; border: 3px solid #ff6600; margin-bottom: 20px;">
+                        <h3 style="font-size: 18px; font-weight: 600; color: #ff6600; margin-bottom: 16px;">📋 Situación Actual</h3>
+                        <div style="background: white; padding: 20px; border-radius: 8px; margin-bottom: 16px;">
+                            <p style="font-size: 14px; color: #666; line-height: 1.8; margin: 0;">
+                                Actualmente, cuando un squad identifica la necesidad de un entrenamiento, la <strong>validación y aprobación final</strong> está a cargo del POC de Cx Academy. Esta decisión se toma desde una <strong>perspectiva estratégica y de planificación</strong>, que si bien es importante, puede diferir de la <strong>visión operativa directa</strong> que tienen los líderes de squad sobre las necesidades inmediatas de sus equipos.
+                            </p>
+                        </div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                            <div style="background: white; padding: 16px; border-radius: 8px;">
+                                <h4 style="font-size: 14px; font-weight: 600; color: #ff6600; margin-bottom: 10px;">Áreas de oportunidad:</h4>
+                                <ul style="margin-left: 20px; font-size: 13px; line-height: 1.6; color: #666;">
+                                    <li>Alineación entre visión estratégica y necesidad operativa</li>
+                                    <li>Mayor visibilidad del contexto diario de los squads</li>
+                                    <li>Priorización conjunta de entrenamientos</li>
+                                    <li>Canales de comunicación más directos</li>
+                                </ul>
+                            </div>
+                            <div style="background: white; padding: 16px; border-radius: 8px;">
+                                <h4 style="font-size: 14px; font-weight: 600; color: #ff6600; margin-bottom: 10px;">Beneficios potenciales:</h4>
+                                <ul style="margin-left: 20px; font-size: 13px; line-height: 1.6; color: #666;">
+                                    <li>Cierre de brechas de conocimiento más ágil</li>
+                                    <li>Reducción de errores operativos</li>
+                                    <li>Mayor satisfacción de los equipos</li>
+                                    <li>Optimización de recursos de capacitación</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="background: #e8f9f0; padding: 24px; border-radius: 12px; border: 3px solid #00a868;">
+                        <h3 style="font-size: 18px; font-weight: 600; color: #00a868; margin-bottom: 16px;">✅ Propuesta de Mejora</h3>
+                        <div style="background: white; padding: 20px; border-radius: 8px;">
+                            <p style="font-size: 14px; color: #666; line-height: 1.8; margin-bottom: 16px;">
+                                <strong style="color: #00a868;">Modelo colaborativo de gestión de entrenamientos</strong>, donde los squads tengan mayor participación en la identificación de necesidades, aprovechando su conocimiento directo de la operación, las brechas de conocimiento específicas y las dinámicas particulares de sus equipos.
+                            </p>
+                            <div style="background: #f0f9f5; padding: 16px; border-radius: 8px; border-left: 4px solid #00a868;">
+                                <h4 style="font-size: 14px; font-weight: 600; color: #00a868; margin-bottom: 10px;">Beneficios esperados:</h4>
+                                <ul style="margin-left: 20px; font-size: 13px; line-height: 1.6; color: #666;">
+                                    <li><strong>Agilidad:</strong> Respuesta más rápida a necesidades de capacitación identificadas</li>
+                                    <li><strong>Precisión:</strong> Entrenamientos mejor alineados con necesidades operativas reales</li>
+                                    <li><strong>Colaboración:</strong> Squads y Cx Academy trabajando en conjunto con roles complementarios</li>
+                                    <li><strong>Efectividad:</strong> Optimización de recursos en capacitaciones con mayor impacto</li>
+                                    <li><strong>Integración:</strong> Mayor aprovechamiento del conocimiento de primera mano de los equipos</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- RECOMENDACIONES FINALES -->
+                <div class="section">
+                    <h2 class="section-title" style="color: #ff6600; border-bottom-color: #ff6600;">🎯 RECOMENDACIONES FINALES</h2>
+                    
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px;">
+                        <div class="recommendation-item">
+                            <strong>1. Implementar dashboard automático urgente</strong>
+                            <div class="list-item-desc">Establecer fecha compromiso para dashboard con actualización diaria desde Weduka</div>
+                        </div>
+                        <div class="recommendation-item">
+                            <strong>2. Validar datos antes de compartir</strong>
+                            <div class="list-item-desc">Cx Academy debe validar información antes de enviar reportes oficiales</div>
+                        </div>
+                        <div class="recommendation-item">
+                            <strong>3. Modelo colaborativo para determinación de necesidades</strong>
+                            <div class="list-item-desc">Establecer proceso conjunto donde squads y Cx Academy trabajen en la identificación y priorización de entrenamientos</div>
+                        </div>
+                        <div class="recommendation-item">
+                            <strong>4. Proceso de corrección de reportes</strong>
+                            <div class="list-item-desc">Establecer mecanismo ágil para corregir datos incorrectos que afectan evaluaciones</div>
+                        </div>
+                        <div class="recommendation-item">
+                            <strong>5. Flexibilidad en duración de entrenamientos</strong>
+                            <div class="list-item-desc">Si bien existe un límite de 1 hora por squad, se debe garantizar la posibilidad de extender el tiempo cuando el entrenamiento sea delicado o requiera mayor profundidad, priorizando la calidad del aprendizaje sobre restricciones temporales rígidas</div>
+                        </div>
+                    </div>
+                </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CONTROLES DE NAVEGACIÓN -->
+    <div class="slide-nav">
+        <button class="nav-btn" id="prevBtn" onclick="changeSlide(-1)">‹</button>
+        <button class="nav-btn" id="nextBtn" onclick="changeSlide(1)">›</button>
+    </div>
+
+    <div class="slide-indicator">
+        <div class="indicator-dot active" onclick="goToSlide(0)"></div>
+        <div class="indicator-dot" onclick="goToSlide(1)"></div>
+        <div class="indicator-dot" onclick="goToSlide(2)"></div>
+    </div>
+
+    <script>
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const dots = document.querySelectorAll('.indicator-dot');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+
+        function showSlide(n) {
+            slides.forEach(slide => {
+                slide.classList.remove('active');
+            });
+            dots.forEach(dot => {
+                dot.classList.remove('active');
+            });
+
+            if (n >= slides.length) {
+                currentSlide = slides.length - 1;
+            }
+            if (n < 0) {
+                currentSlide = 0;
+            }
+
+            slides[currentSlide].classList.add('active');
+            dots[currentSlide].classList.add('active');
+
+            // Actualizar botones
+            prevBtn.disabled = currentSlide === 0;
+            nextBtn.disabled = currentSlide === slides.length - 1;
+        }
+
+        function changeSlide(direction) {
+            currentSlide += direction;
+            showSlide(currentSlide);
+        }
+
+        function goToSlide(n) {
+            currentSlide = n;
+            showSlide(currentSlide);
+        }
+
+        // Navegación con teclado
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft') {
+                changeSlide(-1);
+            } else if (e.key === 'ArrowRight') {
+                changeSlide(1);
+            }
+        });
+
+        // Inicializar
+        showSlide(0);
+    </script>
+</body>
+</html>
